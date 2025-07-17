@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -106,15 +107,15 @@ func TestSetStatus(t *testing.T) {
 	require.NotEmpty(t, number, "номер посылки не должен быть пустым (0)")
 	// set status
 	// обновите статус, убедитесь в отсутствии ошибки
-	newStatus := "в пути"
+	newStatus := ParcelStatusSent
 	err  = store.SetStatus(number, newStatus)
 	require.NoError(t, err, "добавление посылки должно пройти без ошибок")
 
 	// check
 	// получите добавленную посылку и убедитесь, что статус обновился
 	got, err := store.Get(number)
-	require.NoError(t, err, "ошибка при получении посылки")
-	require.Equal(t, newStatus, got.Status, "статус должен быть обновлён")
+	assert.NoError(t, err, "ошибка при получении посылки")
+	assert.Equal(t, newStatus, got.Status, "статус должен быть обновлён")
 }
 
 // TestGetByClient проверяет получение посылок по идентификатору клиента
@@ -155,7 +156,7 @@ func TestGetByClient(t *testing.T) {
 	// get by client
 	storedParcels, err := store.GetByClient(client)// получите список посылок по идентификатору клиента, сохранённого в переменной client
 	require.NoError(t, err)
-    require.Len(t, storedParcels, len(parcels), "должно вернуться столько же посылок, сколько было добавлено")
+    assert.Len(t, storedParcels, len(parcels), "должно вернуться столько же посылок, сколько было добавлено")
 	// убедитесь, что количество полученных посылок совпадает с количеством добавленных
 	
 
@@ -163,9 +164,8 @@ func TestGetByClient(t *testing.T) {
 	for _, parcel := range storedParcels {
 		 
 		expected, ok := parcelMap[parcel.Number]// в parcelMap лежат добавленные посылки, ключ - идентификатор посылки, значение - сама посылка
-		require.True(t, ok, "посылка с номером %v не найдена в ожидаемом списке", parcel.Number)// убедитесь, что все посылки из storedParcels есть в parcelMap
-		require.Equal(t, expected.Client, parcel.Client)
-		require.Equal(t, expected.Address, parcel.Address)
-		require.Equal(t, expected.Status, parcel.Status)// убедитесь, что значения полей полученных посылок заполнены верно
+		assert.True(t, ok, "посылка с номером %v не найдена в ожидаемом списке", parcel.Number)// убедитесь, что все посылки из storedParcels есть в parcelMap
+		assert.Equal(t, expected, parcel)// убедитесь, что значения полей полученных посылок заполнены верно
+		
 	}
 }
